@@ -34,6 +34,13 @@ impl Counter {
     }
 }
 
+fn difference(str1: &str, str2: &str) -> usize {
+    str1.chars()
+        .zip(str2.chars())
+        .filter(|&(a, b)| a != b)
+        .count()
+}
+
 fn main() {
     let mut file = File::open("input").unwrap();
     let mut contents = String::new();
@@ -45,4 +52,13 @@ fn main() {
     }
 
     println!("Part 1: {}", counter.checksum());
+
+    'outer: for str1 in contents.lines() {
+        for str2 in contents.lines() {
+            if difference(str1, str2) == 1 {
+                println!("Part 2:\n{}\n{}", str1, str2);
+                break 'outer;
+            }
+        }
+    }
 }
