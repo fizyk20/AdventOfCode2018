@@ -177,6 +177,22 @@ impl Analyser {
         }
         max_index
     }
+
+    fn max_guard_and_minute(&self) -> (usize, usize) {
+        let mut max_guard = 0;
+        let mut max_minute = 0;
+        let mut max_minutes = 0;
+        for &guard in self.guards.keys() {
+            let minute = self.max_minute_for_guard(guard);
+            let minutes = self.guards[&guard][minute];
+            if minutes > max_minutes {
+                max_minutes = minutes;
+                max_minute = minute;
+                max_guard = guard;
+            }
+        }
+        (max_guard, max_minute)
+    }
 }
 
 fn main() {
@@ -197,6 +213,15 @@ fn main() {
 
     println!(
         "Part 1:\nMax guard: {}\nMax minute: {}\nTotal: {}",
+        max_guard,
+        max_minute,
+        max_guard * max_minute
+    );
+
+    let (max_guard, max_minute) = analyser.max_guard_and_minute();
+
+    println!(
+        "Part 2:\nMax guard: {}\nMax minute: {}\nTotal: {}",
         max_guard,
         max_minute,
         max_guard * max_minute
