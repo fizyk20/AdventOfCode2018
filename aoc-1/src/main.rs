@@ -2,6 +2,7 @@
 extern crate nom;
 
 use nom::{digit, line_ending, types::CompleteStr};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::Read;
 
@@ -29,6 +30,19 @@ fn main() {
     file.read_to_string(&mut contents).unwrap();
     let values = input(CompleteStr(&contents)).unwrap().1;
 
-    let sum = values.into_iter().sum::<i32>();
+    let sum = values.iter().cloned().sum::<i32>();
     println!("Part1: {}", sum);
+
+    let mut encountered = HashSet::new();
+    let _ = encountered.insert(0);
+    let mut current_freq = 0;
+
+    for freq in values.into_iter().cycle() {
+        current_freq += freq;
+        if encountered.contains(&current_freq) {
+            break;
+        }
+        let _ = encountered.insert(current_freq);
+    }
+    println!("Part2: {}", current_freq);
 }
