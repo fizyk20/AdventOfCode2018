@@ -153,45 +153,33 @@ impl Analyser {
     }
 
     fn max_guard(&self) -> usize {
-        let mut max_guard = 0;
-        let mut max_total = 0;
-        for (&guard, &minutes) in &self.guards {
-            let total = (&minutes).into_iter().cloned().sum();
-            if total > max_total {
-                max_guard = guard;
-                max_total = total;
-            }
-        }
-        max_guard
+        self.guards
+            .iter()
+            .max_by_key(|(_, minutes)| minutes.into_iter().cloned().sum::<usize>())
+            .map(|(&guard, _)| guard)
+            .unwrap()
     }
 
     fn max_minute_for_guard(&self, guard: usize) -> usize {
-        let minutes = self.guards.get(&guard).unwrap();
-        let mut max_index = 0;
-        let mut max_minutes = 0;
-        for (i, &x) in minutes.into_iter().enumerate() {
-            if x > max_minutes {
-                max_index = i;
-                max_minutes = x;
-            }
-        }
-        max_index
+        self.guards[&guard]
+            .iter()
+            .enumerate()
+            .max_by_key(|(_, &x)| x)
+            .map(|(i, _)| i)
+            .unwrap()
     }
 
     fn max_guard_and_minute(&self) -> (usize, usize) {
-        let mut max_guard = 0;
-        let mut max_minute = 0;
-        let mut max_minutes = 0;
-        for &guard in self.guards.keys() {
-            let minute = self.max_minute_for_guard(guard);
-            let minutes = self.guards[&guard][minute];
-            if minutes > max_minutes {
-                max_minutes = minutes;
-                max_minute = minute;
-                max_guard = guard;
-            }
-        }
-        (max_guard, max_minute)
+        self.guards
+            .iter()
+            .flat_map(|(&guard, minutes)| {
+                minutes
+                    .into_iter()
+                    .enumerate()
+                    .map(move |(i, &mins)| (guard, i, mins))
+            }).max_by_key(|(_, _, mins)| *mins)
+            .map(|(guard, index, _)| (guard, index))
+            .unwrap()
     }
 }
 
