@@ -51,15 +51,27 @@ fn apply_claim(canvas: &mut [u8], claim: Claim) {
     }
 }
 
+fn check_claim(canvas: &[u8], claim: Claim) -> bool {
+    let mut result = true;
+    for x in claim.x..claim.x + claim.w {
+        for y in claim.y..claim.y + claim.h {
+            if canvas[coord_to_index(x, y)] > 1 {
+                result = false;
+            }
+        }
+    }
+    result
+}
+
 fn main() {
     let mut file = File::open("input").unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
 
-    let claims = input(CompleteStr(&contents)).unwrap();
+    let claims = input(CompleteStr(&contents)).unwrap().1;
 
     let mut canvas = [0u8; DIM * DIM];
-    for claim in claims.1 {
+    for claim in claims.clone() {
         apply_claim(&mut canvas, claim);
     }
 
@@ -67,4 +79,12 @@ fn main() {
         "Part 1: {}",
         (&canvas).into_iter().filter(|&&x| x > 1).count()
     );
+
+    let id = claims
+        .into_iter()
+        .find(|claim| check_claim(&canvas, *claim))
+        .map(|claim| claim.id)
+        .unwrap();
+
+    println!("Part 2: {}", id);
 }
