@@ -19,7 +19,7 @@ fn append(new_str: &mut Vec<char>, c: char) {
     }
 }
 
-fn collapse(data: Vec<char>) -> Vec<char> {
+fn collapse<I: IntoIterator<Item = char>>(data: I) -> Vec<char> {
     let mut result = Vec::new();
     for c in data {
         append(&mut result, c);
@@ -33,7 +33,19 @@ fn main() {
     let _ = file.read_to_string(&mut contents);
     let initial_data: Vec<char> = contents.trim_end().chars().collect();
 
-    let collapsed_data = collapse(initial_data);
+    let collapsed_data = collapse(initial_data.clone());
 
     println!("Part 1: {}", collapsed_data.len());
+
+    let min_len = (97u8..=122) // 'a' to 'z'
+        .map(|exclude| {
+            let filtered_data = initial_data
+                .iter()
+                .filter(|&c| c.to_lowercase().next().unwrap() != exclude.into())
+                .cloned();
+            collapse(filtered_data).len()
+        }).min()
+        .unwrap();
+
+    println!("Part 2: {}", min_len);
 }
