@@ -1,7 +1,8 @@
 use nom::types::CompleteStr;
 use nom::*;
+use std::collections::VecDeque;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 
 #[derive(Clone, Debug)]
 struct TreeNode {
@@ -47,6 +48,33 @@ impl TreeNode {
     }
 }
 
+fn dump(node: &TreeNode) {
+    let mut file = File::create("graph.dot").unwrap();
+    let mut data = String::new();
+    data.push_str("digraph aoc8 {\n");
+
+    let mut node_queue = VecDeque::new();
+    node_queue.push_back((1usize, node));
+    let mut next_id = 2;
+
+    while !node_queue.is_empty() {
+        let (cur_id, cur_node) = node_queue.pop_front().unwrap();
+        data.push_str(&format!(
+            "{} [label=\"{}\nMetadata: {:?}\"]\n",
+            cur_id, cur_id, cur_node.metadata
+        ));
+        for child in &cur_node.children {
+            node_queue.push_back((next_id, child));
+            data.push_str(&format!("{} -> {}\n", cur_id, next_id));
+            next_id += 1;
+        }
+    }
+
+    data.push_str("}\n");
+
+    let _ = file.write_all(data.as_bytes());
+}
+
 fn main() {
     let mut file = File::open("input").unwrap();
     let mut data = String::new();
@@ -57,4 +85,6 @@ fn main() {
 
     println!("Part 1: {}", data.sum_all_metadata());
     println!("Part 2: {}", data.value());
+
+    dump(&data);
 }
